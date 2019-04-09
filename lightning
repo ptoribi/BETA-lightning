@@ -11,7 +11,7 @@
 ##    project site:   https://github.com/ptoribi/lightning                                   ##
 ##                                                                                           ##
 ##    file description:  main program file -> displays menu, starts selected scenario,       ##
-##                       stops already launched scenario or purges the system                ##       
+##                       stops already launched scenario or purges the system                ##
 ##                                                                                           ##
 ##    usage:             not to be used directly, but summoned by "lightning-launcher" file  ##
 ##                                                                                           ##
@@ -55,15 +55,22 @@ else
     # ptoribi: execute scenario and show related .pdf file if present in "scenarios"
     if [[ -e $SCENARIOS_PATH/$2 || -e $SCENARIOS_PATH/$2.xml ]]
     then
-    
+
       if [ -e $SCENARIOS_PATH/$2.pdf ]
       then
         evince $SCENARIOS_PATH/$2.pdf &
       fi
-      
+
       if [ -e $SCENARIOS_PATH/$2.xml ]
       then
         # --- LAUNCHING SELECTED SCENARIO, XML PARSING ---
+        if [[ $2 == *"/"* ]]
+        then
+          PATH_TO_XML=$SCENARIOS_PATH/$(echo $2 | cut -d / -f 1)/
+        else
+          PATH_TO_XML=$SCENARIOS_PATH/
+        fi
+
         # ptoribi: time will measure how much time takes the commmand to complete
         time read_xml $SCENARIOS_PATH/$2.xml
         echo ""
@@ -73,7 +80,7 @@ else
         time $SCENARIOS_PATH/$2
         echo ""
       fi
-      
+
     # ptoribi: execute scenario and show related .pdf file if present in "scenarios-local"
     elif [[ -e $SCENARIOS_PATH_LOCAL/$2 || -e $SCENARIOS_PATH_LOCAL/$2.xml ]]
     then
@@ -81,10 +88,16 @@ else
       then
         evince $SCENARIOS_PATH_LOCAL/$2.pdf &
       fi
-      
+
       if [ -e $SCENARIOS_PATH_LOCAL/$2.xml ]
       then
         # --- LAUNCHING SELECTED SCENARIO, XML PARSING ---
+        if [[ $2 == *"/"* ]]
+        then
+          PATH_TO_XML=$SCENARIOS_PATH_LOCAL/$(echo $2 | cut -d / -f 1)/
+        else
+          PATH_TO_XML=$SCENARIOS_PATH_LOCAL/
+        fi
         # ptoribi: time will measure how much time takes the commmand to complete
         time read_xml $SCENARIOS_PATH_LOCAL/$2.xml
         echo ""
@@ -94,7 +107,7 @@ else
         time $SCENARIOS_PATH_LOCAL/$2
         echo ""
       fi
-  
+
     else
       # Display usage message
       echo ""

@@ -683,7 +683,6 @@ read_sudo_commands() {
 # description: creates a container of type TYPE with no network interfaces
 # example: create_container h1 host1 host
 create_container() {
-
   local CONTAINER_NAME=$1
   local CONTAINER_HOSTNAME=$2
   local TYPE=$3
@@ -749,6 +748,7 @@ create_container() {
     DOCKER_COMMAND=$DOCKER_COMMAND"--cap-drop=ALL $CAP_ADD_CHAIN_LIST $TYPE_image"
 
     # ptoribi: execute the command and run the container
+    echo $DOCKER_COMMAND
     $DOCKER_COMMAND >> $LIGHTNING_GENERAL_LOG_FILE
 
     if [[ "$TYPE_user" == "same" ]]
@@ -1018,12 +1018,13 @@ read_networks() {
       while [[ ${#NETWORK_CONTAINER} -ne 0 ]]
       do
         NETWORK_CONTAINER_hostname=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container['$NETWORK_CONTAINER_INDEX']/@hostname)' $XML_FILE)
+        if [[ ${#NETWORK_CONTAINER_hostname} -eq 0 ]]; then NETWORK_CONTAINER_hostname=$NETWORK_CONTAINER; fi # ptoribi: if hostname not specified, hostname=name
         NETWORK_CONTAINER_type=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container['$NETWORK_CONTAINER_INDEX']/@type)' $XML_FILE)
 
         check_if_container_already_created $NETWORK_CONTAINER
         if [[ "$container_already_created" == "no" ]]
         then
-          create_container $NETWORK_CONTAINER $NETWORK_CONTAINER_hostname $NETWORK_CONTAINER_type $XML_FILE
+          create_container $NETWORK_CONTAINER $NETWORK_CONTAINER_hostname $NETWORK_CONTAINER_type
         fi
 
         # 3.- CONNECT INTERFACE TO THE NETWORK

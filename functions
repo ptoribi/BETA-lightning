@@ -1037,8 +1037,8 @@ read_networks() {
 
         NETWORK_CONTAINER_EXPOSE_CHAIN=""
         NETWORK_CONTAINER_EXPOSE_INDEX=1
-        NETWORK_CONTAINER_EXPOSE_container_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/interface['$NETWORK_CONTAINER_EXPOSE_INDEX']/@container_port)' $XML_FILE)
-        NETWORK_CONTAINER_EXPOSE_host_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/interface['$NETWORK_CONTAINER_EXPOSE_INDEX']/@host_port)' $XML_FILE)
+        NETWORK_CONTAINER_EXPOSE_container_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/expose_port['$NETWORK_CONTAINER_EXPOSE_INDEX']/@container_port)' $XML_FILE)
+        NETWORK_CONTAINER_EXPOSE_host_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/expose_port['$NETWORK_CONTAINER_EXPOSE_INDEX']/@host_port)' $XML_FILE)
         while [[ ${#NETWORK_CONTAINER_EXPOSE_container_port} -ne 0 ]]
         do
           NETWORK_CONTAINER_EXPOSE_CHAIN=$NETWORK_CONTAINER_EXPOSE_CHAIN"-p "$NETWORK_CONTAINER_EXPOSE_container_port

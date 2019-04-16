@@ -691,7 +691,7 @@ read_sudo_commands() {
 }
 
 
-# usage: create_container CONTAINER_NAME CONTAINER_HOSTNAME CONTAINER_TYPE
+# usage: ainer CONTAINER_NAME CONTAINER_HOSTNAME CONTAINER_TYPE
 # description: creates a container of type TYPE with no network interfaces
 # example: create_container h1 host1 host
 create_container() {
@@ -724,7 +724,7 @@ create_container() {
 
     # ptoribi: basic info about the container, as the name or the hostname
     # --rm means the container will be destroyed when stopped, no need to make "docker rm $ROUTER_NAME" after stop
-    local DOCKER_COMMAND="docker run -t -d --rm --name=$CONTAINER_NAME --hostname=$CONTAINER_HOSTNAME --net=none "
+    local DOCKER_COMMAND="docker run $NETWORK_CONTAINER_EXPOSE_CHAIN -t -d --rm --name=$CONTAINER_NAME --hostname=$CONTAINER_HOSTNAME --net=none "
 
     # ptoribi: support for IPv6 (all the network interfaces)
     if [[ "$TYPE_enable_ipv6" == "yes" ]]
@@ -1002,6 +1002,7 @@ read_networks() {
   # ptoribi: variables and indexes for reading the XML file
   local NETWORK_INDEX=1
   local NETWORK_CONTAINER_INDEX=1
+  local NETWORK_CONTAINER_EXPOSE_INDEX=1
   local NETWORK_CONTAINER_INTERFACE_INDEX=1
   local NETWORK_CONTAINER_INTERFACE_IP_INDEX=1
 
@@ -1011,6 +1012,8 @@ read_networks() {
   local NETWORK_CONTAINER
   local NETWORK_CONTAINER_hostname
   local NETWORK_CONTAINER_type
+  local NETWORK_CONTAINER_EXPOSE_host_port
+  local NETWORK_CONTAINER_EXPOSE_container_port
 
   local NETWORK_CONTAINER_IP
 
@@ -1031,6 +1034,23 @@ read_networks() {
         NETWORK_CONTAINER_hostname=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container['$NETWORK_CONTAINER_INDEX']/@hostname)' $XML_FILE)
         if [[ ${#NETWORK_CONTAINER_hostname} -eq 0 ]]; then NETWORK_CONTAINER_hostname=$NETWORK_CONTAINER; fi # ptoribi: if hostname not specified, hostname=name
         NETWORK_CONTAINER_type=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container['$NETWORK_CONTAINER_INDEX']/@type)' $XML_FILE)
+
+        NETWORK_CONTAINER_EXPOSE_CHAIN=""
+        NETWORK_CONTAINER_EXPOSE_INDEX=1
+        NETWORK_CONTAINER_EXPOSE_container_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/interface['$NETWORK_CONTAINER_EXPOSE_INDEX']/@container_port)' $XML_FILE)
+        NETWORK_CONTAINER_EXPOSE_host_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/interface['$NETWORK_CONTAINER_EXPOSE_INDEX']/@host_port)' $XML_FILE)
+        while [[ ${#NETWORK_CONTAINER_EXPOSE_container_port} -ne 0 ]]
+        do
+          NETWORK_CONTAINER_EXPOSE_CHAIN=$NETWORK_CONTAINER_EXPOSE_CHAIN"-p "$NETWORK_CONTAINER_EXPOSE_container_port
+          if [[ ${#NETWORK_CONTAINER_EXPOSE_host_port} -ne 0 ]]
+          then
+            NETWORK_CONTAINER_EXPOSE_CHAIN=$NETWORK_CONTAINER_EXPOSE_CHAIN":"$NETWORK_CONTAINER_EXPOSE_container_port" "
+          fi
+
+          ((NETWORK_CONTAINER_EXPOSE_INDEX++))
+          NETWORK_CONTAINER_EXPOSE_container_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/interface['$NETWORK_CONTAINER_EXPOSE_INDEX']/@container_port)' $XML_FILE)
+          NETWORK_CONTAINER_EXPOSE_host_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/interface['$NETWORK_CONTAINER_EXPOSE_INDEX']/@host_port)' $XML_FILE)
+        done
 
         check_if_container_already_created $NETWORK_CONTAINER
         if [[ "$container_already_created" == "no" ]]

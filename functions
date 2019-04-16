@@ -724,6 +724,7 @@ create_container() {
 
     # ptoribi: basic info about the container, as the name or the hostname
     # --rm means the container will be destroyed when stopped, no need to make "docker rm $ROUTER_NAME" after stop
+    echo $NETWORK_CONTAINER_EXPOSE_CHAIN
     local DOCKER_COMMAND="docker run $NETWORK_CONTAINER_EXPOSE_CHAIN -t -d --rm --name=$CONTAINER_NAME --hostname=$CONTAINER_HOSTNAME --net=none "
 
     # ptoribi: support for IPv6 (all the network interfaces)
@@ -1048,8 +1049,8 @@ read_networks() {
           fi
 
           ((NETWORK_CONTAINER_EXPOSE_INDEX++))
-          NETWORK_CONTAINER_EXPOSE_container_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/interface['$NETWORK_CONTAINER_EXPOSE_INDEX']/@container_port)' $XML_FILE)
-          NETWORK_CONTAINER_EXPOSE_host_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/interface['$NETWORK_CONTAINER_EXPOSE_INDEX']/@host_port)' $XML_FILE)
+          NETWORK_CONTAINER_EXPOSE_container_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/expose_port['$NETWORK_CONTAINER_EXPOSE_INDEX']/@container_port)' $XML_FILE)
+          NETWORK_CONTAINER_EXPOSE_host_port=$(xmllint --xpath 'string(/scenario/network[./@name="'"$NETWORK"'"]/container[./@name="'"$NETWORK_CONTAINER"'"]/expose_port['$NETWORK_CONTAINER_EXPOSE_INDEX']/@host_port)' $XML_FILE)
         done
 
         check_if_container_already_created $NETWORK_CONTAINER
